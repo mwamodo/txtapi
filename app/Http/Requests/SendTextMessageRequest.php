@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\ApiKey;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
@@ -37,6 +38,11 @@ class SendTextMessageRequest extends FormRequest
             'replyWebhookUrl.url' => 'Webhook URL must be a valid URL',
             'webhookData.max' => 'Webhook data cannot exceed 100 characters',
         ];
+    }
+
+    public function getApiKey(): ?ApiKey
+    {
+        return ApiKey::where('key', $this->validated()['key'])->first();
     }
 
     protected function failedValidation(Validator $validator): void
