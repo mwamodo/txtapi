@@ -17,6 +17,7 @@ return [
     'twilio' => [
         'account_sid' => env('TWILIO_ACCOUNT_SID'),
         'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        'local_sms_status' => env('TWILIO_LOCAL_SMS_STATUS'),
     ],
 
     'postmark' => [

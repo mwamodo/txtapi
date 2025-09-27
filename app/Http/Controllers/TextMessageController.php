@@ -19,6 +19,10 @@ class TextMessageController extends Controller
                 apiKey: $apiKey,
             );
 
+            if (!$results['success']) {
+                return $this->errorResponse('server_error', $results['error'], 500);
+            }
+
             return response()->json($results);
         } catch (\Exception $exception) {
             Log::error('SMS sending failed', [
