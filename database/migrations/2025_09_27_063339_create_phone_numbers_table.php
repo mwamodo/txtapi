@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\BusinessPhoneType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,10 +11,11 @@ return new class extends Migration
     {
         Schema::create('phone_numbers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('name')->nullable();
             $table->string('phone_number');
-            $table->string('friendly_name');
-            $table->string('type');
+            $table->string('friendly_name')->nullable();
+            $table->string('type')->default(BusinessPhoneType::LOCAL);
             $table->string('phone_number_sid');
             $table->string('caller_id')->nullable();
             $table->text('address')->nullable();
@@ -22,10 +24,5 @@ return new class extends Migration
             $table->json('settings')->nullable();
             $table->timestamps();
         });
-    }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('phone_numbers');
     }
 };

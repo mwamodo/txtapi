@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('text_messages', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('phone_number_id')->constrained()->cascadeOnDelete();
             $table->string('from');
             $table->string('to');
@@ -20,10 +20,5 @@ return new class extends Migration
             $table->string('message_status')->nullable();
             $table->timestamps();
         });
-    }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('text_messages');
     }
 };
