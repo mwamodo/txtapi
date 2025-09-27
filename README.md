@@ -98,12 +98,12 @@ Quota: per‑key allowance. Decrement on “accepted for delivery” (when queue
 
 ## Error Model (stable across endpoints)
 ```json
-    {
-        "success": false,
-        "error": "<machine_code>",
-        "message": "Human-readable explanation",
-        "hint": "Optional short remediation tip"
-    }
+{
+    "success": false,
+    "error": "<machine_code>",
+    "message": "Human-readable explanation",
+    "hint": "Optional short remediation tip"
+}
 ```
 
 **Common error codes**: `invalid_key`, `key_disabled`, `insufficient_quota`, `invalid_phone`, `message_too_long`, `rate_limited`, `provider_unavailable`, `delivery_failed`
