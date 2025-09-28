@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('text_messages', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('phone_number_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('phone_number_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('from');
             $table->string('to');
             $table->string('sid', 500)->nullable();

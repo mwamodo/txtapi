@@ -3,15 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Actions\SendTextMessage;
+use App\Actions\ValidateKey;
 use App\Http\Requests\SendTextMessageRequest;
+use App\Support\Helpers;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 class TextMessageController extends Controller
 {
-    public function send(SendTextMessageRequest $request)
+    public function send(SendTextMessageRequest $request): JsonResponse
     {
         try {
-            $apiKey = $this->validateKey($request);
+            $apiKey = ValidateKey::run($request);
+
+            if ($apiKey instanceof JsonResponse) {
+                return $apiKey;
+            }
 
             $results = SendTextMessage::run(
                 phone: $request->validated()['phone'],
@@ -20,7 +27,7 @@ class TextMessageController extends Controller
             );
 
             if (!$results['success']) {
-                return $this->errorResponse('server_error', $results['error'], 500);
+                return Helpers::errorResponse('server_error', $results['error'], 500);
             }
 
             return response()->json($results);
@@ -30,31 +37,7 @@ class TextMessageController extends Controller
                 'request' => $request->validated(),
             ]);
 
-            return $this->errorResponse('server_error', 'Internal server error occurred', 500);
+            return Helpers::errorResponse('server_error', 'Internal server error occurred', 500);
         }
-    }
-
-    private function validateKey(SendTextMessageRequest $request)
-    {
-        $apiKey = $request->getApiKey();
-
-        if (empty($apiKey)) {
-            return $this->errorResponse('invalid_key', 'Invalid API Key', 402);
-        }
-
-        if (!$apiKey->hasQuotaAvailable()) {
-            return $this->errorResponse('insufficient_quota', 'Quota Exceeded', 402);
-        }
-
-        return $apiKey;
-    }
-
-    private function errorResponse(string $error, string $message, int $status)
-    {
-        return response()->json([
-            'success' => false,
-            'error' => $error,
-            'message' => $message,
-        ], $status);
     }
 }
