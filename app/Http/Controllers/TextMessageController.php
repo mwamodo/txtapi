@@ -6,8 +6,8 @@ use App\Actions\SendTextMessage;
 use App\Actions\ValidateKey;
 use App\Http\Requests\SendTextMessageRequest;
 use App\Support\Helpers;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class TextMessageController extends Controller
 {
@@ -26,9 +26,12 @@ class TextMessageController extends Controller
                 apiKey: $apiKey,
             );
 
-            if (!$results['success']) {
+            if (! $results['success']) {
                 return Helpers::errorResponse('server_error', $results['error'], 500);
             }
+
+            $apiKey->decrementQuota();
+            $results['quotaRemaining'] = $apiKey->quota_remaining;
 
             return response()->json($results);
         } catch (\Exception $exception) {
