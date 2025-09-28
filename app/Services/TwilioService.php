@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\PhoneNumber;
+use App\Models\TextMessage;
 use Twilio\Rest\Client;
 use Exception;
 
@@ -12,20 +13,21 @@ class TwilioService
         private Client $twilioClient
     ){}
 
-    public function sendTextMessage(string $phone, string $message)
+    public function sendTextMessage(TextMessage $textMessage)
     {
         try {
             $parameters = [
-                'from' => $this->getSendingPhoneNumber()->phone_number,
-                'body' => $message,
+                'from' => $textMessage->from,
+                'body' => $textMessage->body,
                 'statusCallback' => app()->environment('local') ?
                     config('services.twilio.local_sms_status') :
                     url('/') . '/api/external/sms/status',
             ];
 
-            $response = $this->twilioClient->messages->create($phone, $parameters);
+            $response = $this->twilioClient->messages->create($textMessage->to, $parameters);
 
             $result['data'] = $response->toArray();
+
             if (! empty($result['data']['errorCode'])) {
                 throw new Exception('Send SMS request failed: ' . $result['data']['errorCode']);
             }
@@ -38,11 +40,5 @@ class TwilioService
         }
 
         return $result;
-    }
-
-    private function getSendingPhoneNumber(): PhoneNumber
-    {
-        // todo: implement the logic to get the sending phone number
-        return PhoneNumber::first();
     }
 }
