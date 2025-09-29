@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\ApiKey;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
 class SendTextMessageRequest extends FormRequest
@@ -24,6 +24,19 @@ class SendTextMessageRequest extends FormRequest
             'replyWebhookUrl' => ['sometimes', 'url'],
             'webhookData' => ['sometimes', 'string', 'max:100'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->filled('key')) {
+            $bearerToken = $this->bearerToken();
+
+            if ($bearerToken !== null) {
+                $this->merge([
+                    'key' => $bearerToken,
+                ]);
+            }
+        }
     }
 
     public function messages(): array
@@ -63,6 +76,7 @@ class SendTextMessageRequest extends FormRequest
                 return $code;
             }
         }
+
         return 'validation_error';
     }
 }

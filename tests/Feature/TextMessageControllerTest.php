@@ -55,6 +55,47 @@ it('decrements quota after sending a text message', function () {
     expect($textMessage->message_status)->toBe('sent');
 });
 
+it('accepts the api key from the authorization bearer token header', function () {
+    $user = User::factory()->create();
+
+    PhoneNumber::factory()->create([
+        'user_id' => $user->getKey(),
+        'is_primary' => true,
+    ]);
+
+    $apiKey = ApiKey::factory()->create([
+        'user_id' => $user->getKey(),
+        'quota_remaining' => 1,
+    ]);
+
+    mock(TwilioService::class)
+        ->shouldReceive('sendTextMessage')
+        ->once()
+        ->andReturn([
+            'success' => true,
+            'data' => [
+                'sid' => 'SM0987654321',
+                'status' => 'queued',
+            ],
+        ]);
+
+    $response = $this
+        ->withHeader('Authorization', 'Bearer '.$apiKey->key)
+        ->postJson(route('text.send'), [
+            'phone' => '+15005550006',
+            'message' => 'Header test message',
+        ]);
+
+    $response
+        ->assertSuccessful()
+        ->assertJson([
+            'success' => true,
+            'quotaRemaining' => 0,
+        ]);
+
+    expect($apiKey->fresh()->quota_remaining)->toBe(0);
+});
+
 it('returns validation error details when payload is invalid', function () {
     $response = $this->postJson(route('text.send'), [
         'phone' => '5005550006',
