@@ -96,17 +96,8 @@ Quota: per‑key allowance. Decrement on “accepted for delivery” (when queue
 {
     "success": false,
     "error": "<machine_code>",
-    "message": "Human-readable explanation",
-    "hint": "Optional short remediation tip"
+    "message": "Human-readable explanation"
 }
 ```
 
 **Common error codes**: `invalid_key`, `key_disabled`, `insufficient_quota`, `invalid_phone`, `message_too_long`, `rate_limited`, `provider_unavailable`, `delivery_failed`
-
-## Architecture (v0)
-
-// todo:
-
-## Docs Plan
-
-// todo
