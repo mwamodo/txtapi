@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('text', [TextMessageController::class, 'send'])->name('text.send');
 
+Route::get('quota/{key}', [TextMessageController::class, 'quota'])->name('text.quota');
+
 Route::get('status/{textId}', [TextMessageController::class, 'status'])->name('text.status');
 
 Route::group(['prefix' => 'external/sms'], function () {

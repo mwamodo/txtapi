@@ -152,8 +152,6 @@ it('returns the status for a text message', function () {
         ->assertJson([
             'success' => true,
             'status' => 'sent',
-            'provider' => 'twilio',
-            'errorCode' => null,
         ]);
 
     expect($response->json('updatedAt'))->toBe($textMessage->fresh()->updated_at?->toISOString());
@@ -168,5 +166,50 @@ it('returns not found when the text message does not exist', function () {
             'success' => false,
             'error' => 'not_found',
             'message' => 'Text message not found',
+        ]);
+});
+
+it('returns the remaining quota for an active API key', function () {
+    $apiKey = ApiKey::factory()->create([
+        'quota_remaining' => 42,
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson(route('text.quota', ['key' => $apiKey->key]));
+
+    $response
+        ->assertSuccessful()
+        ->assertExactJson([
+            'success' => true,
+            'quotaRemaining' => 42,
+        ]);
+});
+
+it('returns an error when the API key for quota lookup does not exist', function () {
+    $response = $this->getJson(route('text.quota', ['key' => 'missing-key']));
+
+    $response
+        ->assertForbidden()
+        ->assertExactJson([
+            'success' => false,
+            'error' => 'invalid_key',
+            'message' => 'Invalid API Key',
+        ]);
+});
+
+it('returns an error when the API key for quota lookup is inactive', function () {
+    $apiKey = ApiKey::factory()->create([
+        'quota_remaining' => 10,
+        'is_active' => false,
+    ]);
+
+    $response = $this->getJson(route('text.quota', ['key' => $apiKey->key]));
+
+    $response
+        ->assertForbidden()
+        ->assertExactJson([
+            'success' => false,
+            'error' => 'inactive_key',
+            'message' => 'API Key is inactive',
         ]);
 });

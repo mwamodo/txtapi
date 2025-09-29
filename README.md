@@ -25,7 +25,7 @@ POST `/text`
 ```
 phone=+15555555555
 message=Hello world
-key=demo-or-user-key
+key=key
 ```
 
 #### Example JSON
@@ -33,7 +33,7 @@ key=demo-or-user-key
 {
     "phone": "+15555555555",
     "message": "Hello world",
-    "key": "demo-or-user-key"
+    "key": "key"
 }
 ```
 
@@ -42,7 +42,7 @@ key=demo-or-user-key
 {
     "success": true,
     "quotaRemaining": 40,
-    "textId": "msg_01HZX3…"
+    "textId": "0199919a-0461-7242-b584-3175687058b0"
 }
 ```
 
@@ -68,10 +68,7 @@ GET `/quota/:key`
 ```json
 {
     "success": true,
-    "status": "queued|sent|delivered|failed",
-    "provider": "mock|twilio|sns|smtp-gateway",
-    "errorCode": null,
-    "updatedAt": "2025-09-26T17:12:03Z"
+    "quotaRemaining": 69
 }
 ```
 
@@ -84,8 +81,6 @@ GET `/status/:textId`
 {
     "success": true,
     "status": "queued|sent|delivered|failed",
-    "provider": "mock|twilio|sns|smtp-gateway",
-    "errorCode": null,
     "updatedAt": "2025-09-26T17:12:03Z"
 }
 ```

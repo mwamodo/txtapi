@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\SendTextMessage;
 use App\Actions\ValidateKey;
 use App\Http\Requests\SendTextMessageRequest;
+use App\Models\ApiKey;
 use App\Models\TextMessage;
 use App\Support\Helpers;
 use Illuminate\Http\JsonResponse;
@@ -56,9 +57,25 @@ class TextMessageController extends Controller
         return response()->json([
             'success' => true,
             'status' => $textMessage->message_status ?? 'queued',
-            'provider' => 'twilio',
-            'errorCode' => null,
             'updatedAt' => $textMessage->updated_at?->toISOString(),
+        ]);
+    }
+
+    public function quota(string $key): JsonResponse
+    {
+        $apiKey = ApiKey::query()->firstWhere('key', $key);
+
+        if (! $apiKey) {
+            return Helpers::errorResponse('invalid_key', 'Invalid API Key', 403);
+        }
+
+        if (! $apiKey->is_active) {
+            return Helpers::errorResponse('inactive_key', 'API Key is inactive', 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'quotaRemaining' => $apiKey->quota_remaining,
         ]);
     }
 }
