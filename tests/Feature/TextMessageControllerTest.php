@@ -1,10 +1,12 @@
 <?php
 
+use App\Enums\TextMessageDirection;
 use App\Models\ApiKey;
 use App\Models\PhoneNumber;
 use App\Models\TextMessage;
 use App\Models\User;
 use App\Services\TwilioService;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\mock;
 
@@ -132,5 +134,39 @@ it('blocks sending when the API key is inactive', function () {
             'success' => false,
             'error' => 'inactive_key',
             'message' => 'API Key is inactive',
+        ]);
+});
+
+it('returns the status for a text message', function () {
+    $textMessage = TextMessage::factory()->create([
+        'from' => '+15005550006',
+        'to' => '+15005550009',
+        'direction' => TextMessageDirection::OUTBOUND,
+        'message_status' => 'sent',
+    ]);
+
+    $response = $this->getJson(route('text.status', ['textId' => $textMessage->getKey()]));
+
+    $response
+        ->assertSuccessful()
+        ->assertJson([
+            'success' => true,
+            'status' => 'sent',
+            'provider' => 'twilio',
+            'errorCode' => null,
+        ]);
+
+    expect($response->json('updatedAt'))->toBe($textMessage->fresh()->updated_at?->toISOString());
+});
+
+it('returns not found when the text message does not exist', function () {
+    $response = $this->getJson(route('text.status', ['textId' => Str::uuid()->toString()]));
+
+    $response
+        ->assertNotFound()
+        ->assertExactJson([
+            'success' => false,
+            'error' => 'not_found',
+            'message' => 'Text message not found',
         ]);
 });

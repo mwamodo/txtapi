@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\SendTextMessage;
 use App\Actions\ValidateKey;
 use App\Http\Requests\SendTextMessageRequest;
+use App\Models\TextMessage;
 use App\Support\Helpers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -42,5 +43,22 @@ class TextMessageController extends Controller
 
             return Helpers::errorResponse('server_error', 'Internal server error occurred', 500);
         }
+    }
+
+    public function status(string $textId): JsonResponse
+    {
+        $textMessage = TextMessage::query()->find($textId);
+
+        if (! $textMessage) {
+            return Helpers::errorResponse('not_found', 'Text message not found', 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'status' => $textMessage->message_status ?? 'queued',
+            'provider' => 'twilio',
+            'errorCode' => null,
+            'updatedAt' => $textMessage->updated_at?->toISOString(),
+        ]);
     }
 }
