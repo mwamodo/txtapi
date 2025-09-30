@@ -9,6 +9,7 @@ use App\Models\ApiKey;
 use App\Models\TextMessage;
 use App\Support\Helpers;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class TextMessageController extends Controller
@@ -20,6 +21,15 @@ class TextMessageController extends Controller
 
             if ($apiKey instanceof JsonResponse) {
                 return $apiKey;
+            }
+
+            $idempotencyKey = $request->header('Idempotency-Key');
+
+            if ($idempotencyKey) {
+                $cachedResponse = Cache::get("idempotency:{$idempotencyKey}");
+                if ($cachedResponse) {
+                    return response()->json($cachedResponse);
+                }
             }
 
             $results = SendTextMessage::run(
@@ -35,7 +45,13 @@ class TextMessageController extends Controller
             $apiKey->decrementQuota();
             $results['quotaRemaining'] = $apiKey->quota_remaining;
 
-            return response()->json($results);
+            $response = response()->json($results);
+
+            if ($idempotencyKey) {
+                Cache::put("idempotency:{$idempotencyKey}", $results, 86400);
+            }
+
+            return $response;
         } catch (\Exception $exception) {
             Log::error('SMS sending failed', [
                 'error' => $exception->getMessage(),

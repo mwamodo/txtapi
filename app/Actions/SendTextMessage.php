@@ -30,9 +30,9 @@ final class SendTextMessage
         return $response;
     }
 
-    private function updateTextMessage(TextMessage $textMessage, array $smsResults)
+    private function updateTextMessage(TextMessage $textMessage, array $smsResults): void
     {
-        if ($smsResults['success'] && !empty($smsResults['data']['sid'])) {
+        if ($smsResults['success'] && ! empty($smsResults['data']['sid'])) {
             $textMessage->update([
                 'sid' => $smsResults['data']['sid'],
                 'message_status' => $smsResults['data']['status'],
